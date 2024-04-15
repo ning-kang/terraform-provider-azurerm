@@ -468,6 +468,74 @@ func TestAccContainerGroup_linuxComplete(t *testing.T) {
 	})
 }
 
+func TestAccContainerGroup_linuxCompleteUpdate(t *testing.T) {
+	data := acceptance.BuildTestData(t, "azurerm_container_group", "test")
+	r := ContainerGroupResource{}
+
+	data.ResourceTest(t, r, []acceptance.TestStep{
+		{
+			Config: r.linuxBasic(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+				check.That(data.ResourceName).Key("container.#").HasValue("1"),
+			),
+		},
+		{
+			Config: r.linuxCompleteUpdated(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+				check.That(data.ResourceName).Key("dns_name_label_reuse_policy").HasValue("Unsecure"),
+				check.That(data.ResourceName).Key("container.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.ports.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.commands.#").HasValue("3"),
+				check.That(data.ResourceName).Key("container.0.commands.0").HasValue("/bin/bash"),
+				check.That(data.ResourceName).Key("container.0.commands.1").HasValue("-c"),
+				check.That(data.ResourceName).Key("container.0.commands.2").HasValue("ls"),
+				check.That(data.ResourceName).Key("container.0.environment_variables.%").HasValue("2"),
+				check.That(data.ResourceName).Key("container.0.environment_variables.foo").HasValue("bar"),
+				check.That(data.ResourceName).Key("container.0.environment_variables.foo1").HasValue("bar1"),
+				check.That(data.ResourceName).Key("container.0.secure_environment_variables.%").HasValue("2"),
+				check.That(data.ResourceName).Key("container.0.secure_environment_variables.secureFoo").HasValue("secureBar"),
+				check.That(data.ResourceName).Key("container.0.secure_environment_variables.secureFoo1").HasValue("secureBar1"),
+				check.That(data.ResourceName).Key("container.0.gpu.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.gpu.0.count").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.gpu.0.sku").HasValue("K80"),
+				check.That(data.ResourceName).Key("container.0.volume.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.volume.0.mount_path").HasValue("/aci/logs"),
+				check.That(data.ResourceName).Key("container.0.volume.0.name").HasValue("logs"),
+				check.That(data.ResourceName).Key("container.0.volume.0.read_only").HasValue("false"),
+				check.That(data.ResourceName).Key("os_type").HasValue("Linux"),
+				check.That(data.ResourceName).Key("restart_policy").HasValue("OnFailure"),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.#").HasValue("1"),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.0.log_type").HasValue("ContainerInsights"),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.0.metadata.%").HasValue("1"),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.0.workspace_id").Exists(),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.0.workspace_key").Exists(),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.exec.#").HasValue("2"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.exec.0").HasValue("cat"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.exec.1").HasValue("/tmp/healthy"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.http_get.#").HasValue("0"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.initial_delay_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.period_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.failure_threshold").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.success_threshold").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.timeout_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.failure_threshold").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.http_get.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.http_get.0.path").HasValue("/"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.http_get.0.port").HasValue("443"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.http_get.0.scheme").HasValue("Http"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.initial_delay_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.period_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.success_threshold").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.timeout_seconds").HasValue("1"),
+			),
+		},
+	})
+}
+
 func TestAccContainerGroup_virtualNetwork(t *testing.T) {
 	data := acceptance.BuildTestData(t, "azurerm_container_group", "test")
 	r := ContainerGroupResource{}
@@ -605,6 +673,68 @@ func TestAccContainerGroup_windowsComplete(t *testing.T) {
 			"container.0.secure_environment_variables.secureFoo1",
 			"diagnostics.0.log_analytics.0.workspace_key",
 		),
+	})
+}
+
+func TestAccContainerGroup_windowsCompleteUpdate(t *testing.T) {
+	data := acceptance.BuildTestData(t, "azurerm_container_group", "test")
+	r := ContainerGroupResource{}
+
+	data.ResourceTest(t, r, []acceptance.TestStep{
+		{
+			Config: r.windowsBasic(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+				check.That(data.ResourceName).Key("container.#").HasValue("1"),
+				check.That(data.ResourceName).Key("os_type").HasValue("Windows"),
+				check.That(data.ResourceName).Key("container.0.ports.#").HasValue("2"),
+			),
+		},
+		{
+			Config: r.windowsCompleteUpdated(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+				check.That(data.ResourceName).Key("container.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.ports.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.commands.#").HasValue("3"),
+				check.That(data.ResourceName).Key("container.0.commands.0").HasValue("cmd.exe"),
+				check.That(data.ResourceName).Key("container.0.commands.1").HasValue("echo"),
+				check.That(data.ResourceName).Key("container.0.commands.2").HasValue("hi"),
+				check.That(data.ResourceName).Key("container.0.environment_variables.%").HasValue("2"),
+				check.That(data.ResourceName).Key("container.0.environment_variables.foo").HasValue("bar"),
+				check.That(data.ResourceName).Key("container.0.environment_variables.foo1").HasValue("bar1"),
+				check.That(data.ResourceName).Key("container.0.secure_environment_variables.%").HasValue("2"),
+				check.That(data.ResourceName).Key("container.0.secure_environment_variables.secureFoo").HasValue("secureBar"),
+				check.That(data.ResourceName).Key("container.0.secure_environment_variables.secureFoo1").HasValue("secureBar1"),
+				check.That(data.ResourceName).Key("os_type").HasValue("Windows"),
+				check.That(data.ResourceName).Key("restart_policy").HasValue("Never"),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.#").HasValue("1"),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.0.log_type").HasValue("ContainerInsights"),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.0.metadata.%").HasValue("1"),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.0.workspace_id").Exists(),
+				check.That(data.ResourceName).Key("diagnostics.0.log_analytics.0.workspace_key").Exists(),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.exec.#").HasValue("2"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.exec.0").HasValue("cat"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.exec.1").HasValue("/tmp/healthy"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.http_get.#").HasValue("0"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.initial_delay_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.period_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.failure_threshold").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.success_threshold").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.readiness_probe.0.timeout_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.failure_threshold").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.http_get.#").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.http_get.0.path").HasValue("/"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.http_get.0.port").HasValue("443"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.http_get.0.scheme").HasValue("Http"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.initial_delay_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.period_seconds").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.success_threshold").HasValue("1"),
+				check.That(data.ResourceName).Key("container.0.liveness_probe.0.timeout_seconds").HasValue("1"),
+			),
+		},
 	})
 }
 
@@ -1906,6 +2036,140 @@ resource "azurerm_container_group" "test" {
 `, data.RandomInteger, data.Locations.Primary, data.RandomInteger, data.RandomInteger, data.RandomInteger)
 }
 
+func (ContainerGroupResource) windowsCompleteUpdated(data acceptance.TestData) string {
+	return fmt.Sprintf(`
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "test" {
+  name     = "acctestRG-%d"
+  location = "%s"
+}
+
+resource "azurerm_log_analytics_workspace" "test" {
+  name                = "acctestLAW-%d"
+  location            = azurerm_resource_group.test.location
+  resource_group_name = azurerm_resource_group.test.name
+  sku                 = "PerGB2018"
+}
+
+resource "azurerm_log_analytics_solution" "test" {
+  solution_name         = "ContainerInsights"
+  location              = azurerm_resource_group.test.location
+  resource_group_name   = azurerm_resource_group.test.name
+  workspace_resource_id = azurerm_log_analytics_workspace.test.id
+  workspace_name        = azurerm_log_analytics_workspace.test.name
+
+  plan {
+    publisher = "Microsoft"
+    product   = "OMSGallery/ContainerInsights"
+  }
+}
+
+resource "azurerm_container_group" "test" {
+  name                = "acctestcontainergroup-%d"
+  location            = azurerm_resource_group.test.location
+  resource_group_name = azurerm_resource_group.test.name
+  ip_address_type     = "Public"
+  dns_name_label      = "acctestcontainergroup-%d"
+  os_type             = "Windows"
+  restart_policy      = "Never"
+  zone                = [1,2]
+
+  init_container {
+    name  = "init"
+    image = "mcr.microsoft.com/windows/nanoserver:ltsc2022"
+
+    environment_variables = {
+      foo  = "bar"
+      foo1 = "bar1"
+    }
+
+    secure_environment_variables = {
+      secureFoo  = "secureBar"
+      secureFoo1 = "secureBar1"
+    }
+
+    volume = {
+      name        = "emptyDir"
+      mount_path  = "/mnt/emptydir"
+      empty_dir   = true
+    }
+
+    commands = ["/bin/bash", "echo", "hi"]
+  }
+  
+  container {
+    name   = "windowsservercore"
+    image  = "mcr.microsoft.com/windows/servercore/iis:20210810-windowsservercore-ltsc2019"
+    cpu    = "2.0"
+    memory = "3.5"
+
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+
+    environment_variables = {
+      foo  = "bar"
+      foo1 = "bar1"
+    }
+
+    secure_environment_variables = {
+      secureFoo  = "secureBar"
+      secureFoo1 = "secureBar1"
+    }
+
+    readiness_probe {
+      exec                  = ["cat", "/tmp/healthy"]
+      initial_delay_seconds = 1
+      period_seconds        = 1
+      failure_threshold     = 1
+      success_threshold     = 1
+      timeout_seconds       = 1
+    }
+
+    liveness_probe {
+      http_get {
+        path   = "/"
+        port   = 443
+        scheme = "Http"
+        http_headers = {
+          h1 = "v1"
+          h2 = "v2"
+        }
+      }
+
+      initial_delay_seconds = 1
+      period_seconds        = 1
+      failure_threshold     = 1
+      success_threshold     = 1
+      timeout_seconds       = 1
+    }
+
+    commands = ["cmd.exe", "echo", "hi"]
+  }
+
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.test.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.test.primary_shared_key
+      log_type      = "ContainerInsights"
+
+      metadata = {
+        node-name = "acctestContainerGroup"
+      }
+    }
+  }
+
+  tags = {
+    environment = "Testing"
+  }
+}
+`, data.RandomInteger, data.Locations.Primary, data.RandomInteger, data.RandomInteger, data.RandomInteger)
+}
+
 func (ContainerGroupResource) linuxComplete(data acceptance.TestData) string {
 	return fmt.Sprintf(`
 provider "azurerm" {
@@ -1962,6 +2226,183 @@ resource "azurerm_container_group" "test" {
   dns_name_label_reuse_policy = "Unsecure"
   os_type                     = "Linux"
   restart_policy              = "OnFailure"
+
+  container {
+    name   = "hf"
+    image  = "seanmckenna/aci-hellofiles"
+    cpu    = "1"
+    memory = "1.5"
+
+    ports {
+      port     = 80
+      protocol = "TCP"
+    }
+
+    gpu {
+      count = 1
+      sku   = "K80"
+    }
+
+    cpu_limit    = "1"
+    memory_limit = "1.5"
+
+    gpu_limit {
+      count = 1
+      sku   = "K80"
+    }
+
+
+    volume {
+      name       = "logs"
+      mount_path = "/aci/logs"
+      read_only  = false
+      share_name = azurerm_storage_share.test.name
+
+      storage_account_name = azurerm_storage_account.test.name
+      storage_account_key  = azurerm_storage_account.test.primary_access_key
+    }
+
+    environment_variables = {
+      foo  = "bar"
+      foo1 = "bar1"
+    }
+
+    secure_environment_variables = {
+      secureFoo  = "secureBar"
+      secureFoo1 = "secureBar1"
+    }
+
+    readiness_probe {
+      exec                  = ["cat", "/tmp/healthy"]
+      initial_delay_seconds = 1
+      period_seconds        = 1
+      failure_threshold     = 1
+      success_threshold     = 1
+      timeout_seconds       = 1
+    }
+
+    liveness_probe {
+      http_get {
+        path   = "/"
+        port   = 443
+        scheme = "Http"
+        http_headers = {
+          h1 = "v1"
+          h2 = "v2"
+        }
+      }
+
+      initial_delay_seconds = 1
+      period_seconds        = 1
+      failure_threshold     = 1
+      success_threshold     = 1
+      timeout_seconds       = 1
+    }
+
+    commands = ["/bin/bash", "-c", "ls"]
+  }
+
+  diagnostics {
+    log_analytics {
+      workspace_id  = azurerm_log_analytics_workspace.test.workspace_id
+      workspace_key = azurerm_log_analytics_workspace.test.primary_shared_key
+      log_type      = "ContainerInsights"
+
+      metadata = {
+        node-name = "acctestContainerGroup"
+      }
+    }
+  }
+
+  tags = {
+    environment = "Testing"
+  }
+}
+`, data.RandomInteger, data.Locations.Primary, data.RandomInteger, data.RandomInteger, data.RandomInteger, data.RandomInteger, data.RandomInteger)
+}
+
+func (ContainerGroupResource) linuxCompleteUpdated(data acceptance.TestData) string {
+	data.Locations.Primary = "northeurope"
+	data.Locations.Secondary = "westeurope"
+
+	return fmt.Sprintf(`
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_resource_group" "test" {
+  name     = "acctestRG-%d"
+  location = "%s"
+}
+
+resource "azurerm_log_analytics_workspace" "test" {
+  name                = "acctestLAW-%d"
+  location            = azurerm_resource_group.test.location
+  resource_group_name = azurerm_resource_group.test.name
+  sku                 = "PerGB2018"
+}
+
+resource "azurerm_log_analytics_solution" "test" {
+  solution_name         = "ContainerInsights"
+  location              = azurerm_resource_group.test.location
+  resource_group_name   = azurerm_resource_group.test.name
+  workspace_resource_id = azurerm_log_analytics_workspace.test.id
+  workspace_name        = azurerm_log_analytics_workspace.test.name
+
+  plan {
+    publisher = "Microsoft"
+    product   = "OMSGallery/ContainerInsights"
+  }
+}
+
+resource "azurerm_storage_account" "test" {
+  name                     = "accsa%d"
+  resource_group_name      = azurerm_resource_group.test.name
+  location                 = azurerm_resource_group.test.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+
+resource "azurerm_storage_share" "test" {
+  name = "acctestss-%d"
+
+  storage_account_name = azurerm_storage_account.test.name
+
+  quota = 50
+}
+
+resource "azurerm_container_group" "test" {
+  name                        = "acctestcontainergroup-%d"
+  location                    = azurerm_resource_group.test.location
+  resource_group_name         = azurerm_resource_group.test.name
+  ip_address_type             = "Public"
+  dns_name_label              = "acctestcontainergroup-%d"
+  dns_name_label_reuse_policy = "Unsecure"
+  os_type                     = "Linux"
+  restart_policy              = "OnFailure"
+
+  init_container {
+    name  = "init"
+    image = "mcr.microsoft.com/aks/e2e/library-busybox:master.210714.1"
+
+    environment_variables = {
+      foo  = "bar"
+      foo1 = "bar1"
+    }
+
+    secure_environment_variables = {
+      secureFoo  = "secureBar"
+      secureFoo1 = "secureBar1"
+    }
+
+    volume = {
+      name        = "emptyDir"
+      mount_path  = "/mnt/emptydir"
+      empty_dir   = true
+    }
+
+    commands = ["/bin/bash", "-c", "ls"]
+  }
 
   container {
     name   = "hf"
